@@ -7,76 +7,75 @@
           <p>{{ location.description }}</p>
         </div>
 
-          <!-- Индикатор натяжения -->
-          <div class="tension-meter" v-if="fishingState === 'fighting'">
-            <div class="tension-label">Натяжение лески: {{ tension }}%</div>
-            <div class="tension-bar">
-              <div
-                class="tension-fill"
-                :style="{ width: tension + '%' }"
-                :class="getTensionClass()"
-              ></div>
-            </div>
-            <div class="tension-hint">
-              {{ getTensionHint() }}
-            </div>
+        <!-- Индикатор натяжения -->
+        <div class="tension-meter" v-if="fishingState === 'fighting'">
+          <div class="tension-label">Натяжение лески: {{ tension }}%</div>
+          <div class="tension-bar">
+            <div
+              class="tension-fill"
+              :style="{ width: tension + '%' }"
+              :class="getTensionClass()"
+            ></div>
           </div>
-
-          <div class="fishing-controls">
-            <button
-              class="fish-button"
-              @click="startFishing"
-              :disabled="fishingState !== 'idle'"
-              v-if="fishingState === 'idle'"
-            >
-              🎣 Забросить удочку
-            </button>
-
-            <button
-              class="reel-button"
-              @mousedown="startReeling"
-              @mouseup="stopReeling"
-              @touchstart="startReeling"
-              @touchend="stopReeling"
-              :disabled="fishingState !== 'fighting'"
-              v-if="fishingState === 'fighting'"
-            >
-              🎣 ТЯНУТЬ (Удерживайте ЛКМ)
-            </button>
-
-            <div class="result-container" v-if="showResult">
-              <div class="success-message" v-if="fishingResult && fishingResult.type === 'success'">
-                <div class="success-icon">🎉</div>
-                <div class="success-text">
-                  <h3>Поймали!</h3>
-                  <p>{{ currentFish.emoji }} {{ currentFish.name }}</p>
-                </div>
-              </div>
-
-              <div class="failed-message" v-if="fishingResult && fishingResult.type === 'failed'">
-                <div class="failed-icon">❌</div>
-                <div class="failed-text">
-                  <h3>Рыба ушла!</h3>
-                  <p>{{ fishingResult.message }}</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="fishing-hint" v-if="fishingState === 'waiting'">
-              ⏳ Ждем поклевки...
-            </div>
-
-            <div class="fishing-hint" v-if="fishingState === 'fighting'">
-              🎣 Удерживайте ЛКМ чтобы вытащить рыбу! Цель: натяжение ≤ 10%
-            </div>
+          <div class="tension-hint">
+            {{ getTensionHint() }}
           </div>
+        </div>
 
-          <div
-            class="biting-fish"
-            v-if="fishingState === 'fighting' && currentFish"
+        <div class="fishing-controls">
+          <button
+            class="fish-button"
+            @click="startFishing"
+            :disabled="fishingState !== 'idle'"
+            v-if="fishingState === 'idle'"
           >
-            {{ currentFish.emoji }}
+            🎣 Забросить удочку
+          </button>
+
+          <button
+            class="reel-button"
+            @mousedown="startReeling"
+            @mouseup="stopReeling"
+            @touchstart="startReeling"
+            @touchend="stopReeling"
+            :disabled="fishingState !== 'fighting'"
+            v-if="fishingState === 'fighting'"
+          >
+            🎣 ТЯНУТЬ (Удерживайте ЛКМ)
+          </button>
+
+          <div class="result-container" v-if="showResult">
+            <div class="success-message" v-if="fishingResult && fishingResult.type === 'success'">
+              <div class="success-icon">🎉</div>
+              <div class="success-text">
+                <h3>Поймали!</h3>
+                <p>{{ currentFish.emoji }} {{ currentFish.name }}</p>
+              </div>
+            </div>
+
+            <div class="failed-message" v-if="fishingResult && fishingResult.type === 'failed'">
+              <div class="failed-icon">❌</div>
+              <div class="failed-text">
+                <h3>Рыба ушла!</h3>
+                <p>{{ fishingResult.message }}</p>
+              </div>
+            </div>
           </div>
+
+          <div class="fishing-hint" v-if="fishingState === 'waiting'">
+            ⏳ Ждем поклевки...
+          </div>
+
+          <div class="fishing-hint" v-if="fishingState === 'fighting'">
+            🎣 Удерживайте ЛКМ чтобы вытащить рыбу! Цель: натяжение ≤ 10%
+          </div>
+        </div>
+
+        <div
+          class="biting-fish"
+          v-if="fishingState === 'fighting' && currentFish"
+        >
+          {{ currentFish.emoji }}
         </div>
       </div>
     </div>
@@ -126,7 +125,7 @@ export default {
       console.log('🐟 Рыба клюнула!')
       this.fishingState = 'fighting'
       this.currentFish = this.getRandomFish()
-      this.tension  = Math.floor(Math.random() * 30) + 40
+      this.tension = Math.floor(Math.random() * 30) + 40
       console.log('Выпала рыба:', this.currentFish)
       console.log('Начальное натяжение:', this.tension + '%')
 
@@ -289,14 +288,6 @@ export default {
   padding: 20px;
   background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
   z-index: 2;
-}
-
-.fishing-game {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
 }
 
 .tension-meter {
