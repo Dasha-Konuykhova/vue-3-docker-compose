@@ -1,27 +1,24 @@
-import { createWebHistory, createRouter } from 'vue-router'
-
-import IndexPage from './../components/pages/IndexPage.vue'
-import ExamplePage from './../components/pages/ExamplePage.vue'
-
-export const ROUTES = {
-  EXAMPLE: 'EXAMPLE',
-  INDEX: 'INDEX',
-}
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+import FishingLocation from '../views/FishingLocation.vue'
 
 const routes = [
   {
-    name: ROUTES.EXAMPLE,
-    path: '/example',
-    component: ExamplePage
+    path: '/',
+    name: 'Home',
+    component: Home
   },
   {
-    name: ROUTES.INDEX,
-    path: '/',
-    component: IndexPage
-  },
+    path: '/location/:id',
+    name: 'FishingLocation',
+    component: FishingLocation,
+    props: true
+  }
 ]
 
-export const router = createRouter({
-  history: createWebHistory('/'),
-  routes,
+const router = createRouter({
+  history: createWebHistory(),
+  routes
 })
+
+export default router
