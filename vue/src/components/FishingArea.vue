@@ -22,6 +22,7 @@
           </div>
         </div>
 
+        <!-- Элементы управления -->
         <div class="fishing-controls">
           <button
             class="fish-button"
@@ -44,6 +45,7 @@
             🎣 ТЯНУТЬ (Удерживайте ЛКМ)
           </button>
 
+          <!-- РЕЗУЛЬТАТ -->
           <div class="result-container" v-if="showResult">
             <div class="success-message" v-if="fishingResult && fishingResult.type === 'success'">
               <div class="success-icon">🎉</div>
@@ -71,11 +73,25 @@
           </div>
         </div>
 
-        <div
-          class="biting-fish"
-          v-if="fishingState === 'fighting' && currentFish"
-        >
-          {{ currentFish.emoji }}
+        <!-- УДОЧКА И РЫБА -->
+        <div class="fishing-rod-container">
+          <div class="fishing-rod" :class="{
+            casting: fishingState === 'casting',
+            waiting: fishingState === 'waiting',
+            reeling: isReeling
+          }">
+            <div class="rod-handle"></div>
+            <div class="rod-line"></div>
+            <div class="fishing-hook" :class="{ biting: fishingState === 'fighting' }"></div>
+          </div>
+
+          <!-- Клюющая рыба -->
+          <div
+            class="biting-fish"
+            v-if="fishingState === 'fighting' && currentFish"
+          >
+            {{ currentFish.emoji }}
+          </div>
         </div>
       </div>
     </div>
@@ -420,15 +436,125 @@ export default {
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
+/* Стили для удочки */
+.fishing-rod-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.fishing-rod {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  z-index: 5;
+  transition: all 0.5s ease;
+}
+
+.fishing-rod.casting {
+  animation: castRod 1.5s ease;
+}
+
+.fishing-rod.waiting {
+  animation: waitRod 2s infinite alternate;
+}
+
+.fishing-rod.reeling {
+  animation: reelRod 0.3s infinite alternate;
+}
+
+.rod-handle {
+  width: 6px;
+  height: 80px;
+  background: linear-gradient(to right, #8B4513, #A0522D, #8B4513);
+  border-radius: 3px;
+  position: relative;
+  z-index: 2;
+}
+
+.rod-line {
+  width: 2px;
+  height: 150px;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 100%);
+  margin: 0 auto;
+  position: relative;
+  top: -5px;
+}
+
+.fishing-hook {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid #FFD700;
+  border-top: none;
+  border-right: none;
+  border-radius: 0 0 0 50%;
+  transform-origin: top left;
+  transform: translateX(-50%) rotate(-45deg);
+}
+
+.fishing-hook.biting {
+  animation: biteHook 0.5s infinite alternate;
+}
+
 .biting-fish {
   position: absolute;
-  bottom: 140px;
+  bottom: 130px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 32px;
   z-index: 4;
   animation: bite 0.5s infinite alternate;
   filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+}
+
+/* Анимации для удочки */
+@keyframes castRod {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+    bottom: 20px;
+  }
+  50% {
+    transform: translateX(-50%) rotate(-60deg);
+    bottom: 30px;
+  }
+  100% {
+    transform: translateX(-50%) rotate(0deg);
+    bottom: 20px;
+  }
+}
+
+@keyframes waitRod {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  50% { transform: translateX(-50%) rotate(5deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
+}
+
+@keyframes reelRod {
+  0% { bottom: 20px; }
+  100% { bottom: 25px; }
+}
+
+@keyframes biteHook {
+  0% { transform: translateX(-50%) rotate(-45deg); }
+  100% { transform: translateX(-50%) rotate(-35deg); }
+}
+
+@keyframes bite {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-10px); }
 }
 
 @keyframes pulse-danger {
@@ -460,11 +586,6 @@ export default {
   }
 }
 
-@keyframes bite {
-  0% { transform: translateX(-50%) translateY(0); }
-  100% { transform: translateX(-50%) translateY(-10px); }
-}
-
 @media (max-width: 768px) {
   .fishing-area {
     height: 500px;
@@ -477,6 +598,14 @@ export default {
 
   .fishing-controls {
     padding: 15px;
+  }
+
+  .rod-line {
+    height: 120px;
+  }
+
+  .biting-fish {
+    bottom: 100px;
   }
 }
 </style>
