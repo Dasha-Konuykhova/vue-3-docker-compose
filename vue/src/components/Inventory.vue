@@ -20,19 +20,20 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Inventory',
-  props: {
-    caughtFish: {
-      type: Array,
-      default: () => []
-    }
-  }
-}
+<script setup lang="ts">
+import type { CaughtFish } from '../types'
+
+defineProps<{
+  caughtFish: CaughtFish[]
+}>()
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@bg-color: #f8f9fa;
+@border-color: #dee2e6;
+@text-color: #333;
+@muted-color: #6c757d;
+
 .inventory {
   background: white;
   padding: 20px;
@@ -41,12 +42,12 @@ export default {
   height: fit-content;
   max-height: 80vh;
   overflow-y: auto;
-}
 
-.inventory h2 {
-  color: #333;
-  margin-bottom: 15px;
-  text-align: center;
+  h2 {
+    color: @text-color;
+    margin-bottom: 15px;
+    text-align: center;
+  }
 }
 
 .fish-list {
@@ -56,10 +57,10 @@ export default {
 }
 
 .fish-item {
-  background: #f8f9fa;
+  background: @bg-color;
   padding: 10px 15px;
   border-radius: 6px;
-  border: 1px solid #dee2e6;
+  border: 1px solid @border-color;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -71,13 +72,13 @@ export default {
 
 .fish-name {
   font-weight: bold;
-  color: #333;
+  color: @text-color;
   flex: 1;
 }
 
 .fish-location {
   font-size: 0.8em;
-  color: #6c757d;
+  color: @muted-color;
   background: #e9ecef;
   padding: 2px 8px;
   border-radius: 10px;
@@ -90,16 +91,16 @@ export default {
 
 .empty-inventory {
   text-align: center;
-  color: #6c757d;
+  color: @muted-color;
   font-style: italic;
   padding: 20px;
-}
 
-.empty-inventory small {
-  display: block;
-  margin-top: 8px;
-  font-size: 0.9em;
-  opacity: 0.7;
+  small {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.9em;
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 768px) {

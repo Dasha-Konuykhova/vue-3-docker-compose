@@ -1,4 +1,6 @@
-export const locations = [
+import type { Location } from '../types'
+
+export const locations: Location[] = [
   {
     id: 1,
     name: 'Тихая Заводь',

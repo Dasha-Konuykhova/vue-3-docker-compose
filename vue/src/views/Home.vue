@@ -3,40 +3,31 @@
     <h1>🎣 Русская Рыбалка</h1>
     <div class="home-content">
       <LocationSelector :locations="locations" />
-      <Inventory :caught-fish="caughtFish" />
+      <Inventory :caught-fish="fishingStore.caughtFish" />
     </div>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import LocationSelector from '@/components/LocationSelector.vue'
 import Inventory from '@/components/Inventory.vue'
+import { useFishingStore } from '@/stores/fishing'
 import { locations } from '@/data/locations'
 
-export default {
-  name: 'Home',
-  components: {
-    LocationSelector,
-    Inventory
-  },
-  inject: ['caughtFish'],
-  data() {
-    return {
-      locations: locations
-    }
-  }
-}
+const fishingStore = useFishingStore()
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@text-color: #333;
+
 .home {
   min-height: 100vh;
-}
 
-.home h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: @text-color;
+  }
 }
 
 .home-content {

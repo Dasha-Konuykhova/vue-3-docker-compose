@@ -24,24 +24,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LocationSelector',
-  props: {
-    locations: {
-      type: Array,
-      required: true
-    }
-  },
-  methods: {
-    goToLocation(location) {
-      this.$router.push(`/location/${location.id}`)
-    }
-  }
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import type { Location } from '../types'
+
+const router = useRouter()
+
+defineProps<{
+  locations: Location[]
+}>()
+
+const goToLocation = (location: Location) => {
+  router.push(`/location/${location.id}`)
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@primary-color: #4CAF50;
+@text-color: #333;
+@card-hover-color: #4CAF50;
+
 .location-selector {
   background: rgba(255, 255, 255, 0.95);
   padding: 20px;
@@ -49,11 +51,11 @@ export default {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   backdrop-filter: blur(10px);
   height: fit-content;
-}
 
-.location-selector h2 {
-  margin-bottom: 15px;
-  color: #333;
+  h2 {
+    margin-bottom: 15px;
+    color: @text-color;
+  }
 }
 
 .locations-list {
@@ -68,12 +70,12 @@ export default {
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 3px solid transparent;
-}
 
-.location-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-  border-color: #4CAF50;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border-color: @card-hover-color;
+  }
 }
 
 .location-image {
@@ -91,17 +93,17 @@ export default {
   background: linear-gradient(transparent, rgba(0,0,0,0.8));
   color: white;
   padding: 10px;
-}
 
-.location-overlay h3 {
-  margin-bottom: 5px;
-  font-size: 1em;
-}
+  h3 {
+    margin-bottom: 5px;
+    font-size: 1em;
+  }
 
-.location-overlay p {
-  font-size: 0.7em;
-  opacity: 0.9;
-  margin-bottom: 5px;
+  p {
+    font-size: 0.7em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+  }
 }
 
 .fish-preview {

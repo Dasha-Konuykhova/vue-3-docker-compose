@@ -4,31 +4,17 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'App',
-  data() {
-    return {
-      caughtFish: []
-    }
-  },
-  methods: {
-    addFish(fish) {
-      console.log('App: Добавляем рыбу в инвентарь', fish)
-      this.caughtFish.unshift(fish)
-      console.log('App: Текущий улов', this.caughtFish)
-    }
-  },
-  provide() {
-    return {
-      caughtFish: this.caughtFish,
-      addFish: this.addFish
-    }
-  }
-}
+<script setup lang="ts">
+import { useFishingStore } from './stores/fishing'
+
+const fishingStore = useFishingStore()
 </script>
 
-<style>
+<style lang="less">
+@background-color: #f0f2f5;
+@border-color: #ccc;
+@disabled-bg: #e0e0e0;
+
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +23,7 @@ export default {
 
 body {
   font-family: 'Arial', sans-serif;
-  background: #f0f2f5;
+  background: @background-color;
   min-height: 100vh;
   padding: 20px;
 }
@@ -49,19 +35,24 @@ body {
 
 button {
   padding: 10px 20px;
-  border: 1px solid #ccc;
+  border: 1px solid @border-color;
   border-radius: 4px;
   background: white;
   cursor: pointer;
   font-size: 14px;
-}
+  transition: background-color 0.3s ease;
 
-button:hover {
-  background: #f5f5f5;
-}
+  &:hover {
+    background: darken(white, 5%);
+  }
 
-button:disabled {
-  background: #e0e0e0;
-  cursor: not-allowed;
+  &:disabled {
+    background: @disabled-bg;
+    cursor: not-allowed;
+
+    &:hover {
+      background: @disabled-bg;
+    }
+  }
 }
 </style>

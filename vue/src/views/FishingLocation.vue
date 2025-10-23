@@ -14,84 +14,83 @@
   </div>
 </template>
 
-<script>
-import FishingArea from '@/components/FishingArea.vue'
-import { locations } from '@/data/locations'
+<script setup lang="ts">
+import FishingArea from '../components/FishingArea.vue'
+import { computed } from 'vue'
+import { useFishingStore } from '@/stores/fishing'
+import type { Location, Fish, CaughtFish } from '@/types'
 
-export default {
-  name: 'FishingLocation',
-  components: {
-    FishingArea
-  },
-  props: {
-    id: {
-      type: [String, Number],
-      required: true
-    }
-  },
-  inject: ['addFish'],
-  data() {
-    return {
-      locations: locations
-    }
-  },
-  computed: {
-    location() {
-      return this.locations.find(loc => loc.id === parseInt(this.id)) || this.locations[0]
-    }
-  },
-  methods: {
-    handleCatchFish(fishData) {
-      console.log('FishingLocation: Рыба поймана', fishData)
+const props = defineProps<{
+  id: string | number
+}>()
 
-      const caughtFish = {
-        ...fishData,
-        timestamp: new Date().toLocaleTimeString()
-      }
+const fishingStore = useFishingStore()
 
-      console.log('FishingLocation: Вызываем addFish', caughtFish)
-      this.addFish(caughtFish)
-    }
+const location = computed((): Location => {
+  const loc = fishingStore.getLocationById(parseInt(String(props.id)))
+  return loc || fishingStore.getLocationById(1)!
+})
+
+const handleCatchFish = (fishData: Fish & { location: string }) => {
+  console.log('FishingLocation: Рыба поймана', fishData)
+
+  const caughtFish: CaughtFish = {
+    ...fishData,
+    timestamp: new Date().toLocaleTimeString()
   }
+
+  console.log('FishingLocation: Вызываем addFish', caughtFish)
+  fishingStore.addFish(caughtFish)
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@button-bg: #6c757d;
+@button-hover-bg: #5a6268;
+@text-color: #333;
+@border-color: #ddd;
+
 .fishing-location {
   min-height: 100vh;
-}
 
-.location-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
+  .location-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid @border-color;
 
-.back-button {
-  background: #6c757d;
-  color: white;
-  border: none;
-}
+    .back-button {
+      background: @button-bg;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
 
-.back-button:hover {
-  background: #5a6268;
-}
+      &:hover {
+        background: @button-hover-bg;
+      }
+    }
 
-.location-header h1 {
-  color: #333;
-  margin: 0;
+    h1 {
+      color: @text-color;
+      margin: 0;
+    }
+  }
 }
 
 @media (max-width: 768px) {
-  .location-header {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
+  .fishing-location {
+    .location-header {
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
   }
 }
 </style>
