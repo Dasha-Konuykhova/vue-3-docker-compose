@@ -7,26 +7,26 @@
           <p>{{ location.description }}</p>
         </div>
 
-        <div class="tension-meter" v-if="gameStore.fishingState === 'fighting'">
-          <div class="tension-label">Натяжение лески: {{ Math.round(gameStore.tension) }}%</div>
+        <div class="tension-meter" v-if="fishingState === 'fighting'">
+          <div class="tension-label">Натяжение лески: {{ Math.round(tension) }}%</div>
           <div class="tension-bar">
             <div
               class="tension-fill"
-              :style="{ width: gameStore.tension + '%' }"
-              :class="getTensionClass()"
+              :style="{ width: tension + '%' }"
+              :class="tensionClass"
             ></div>
           </div>
           <div class="tension-hint">
-            {{ getTensionHint() }}
+            {{ tensionHint }}
           </div>
         </div>
 
         <div class="fishing-controls">
           <button
             class="fish-button"
-            @click="startFishing"
-            :disabled="gameStore.fishingState !== 'idle'"
-            v-if="gameStore.fishingState === 'idle'"
+            @click="handleStartFishing"
+            :disabled="fishingState !== 'idle'"
+            v-if="fishingState === 'idle'"
           >
             🎣 Забросить удочку
           </button>
@@ -37,55 +37,55 @@
             @mouseup="stopReeling"
             @touchstart="startReeling"
             @touchend="stopReeling"
-            :disabled="gameStore.fishingState !== 'fighting'"
-            v-if="gameStore.fishingState === 'fighting'"
+            :disabled="fishingState !== 'fighting'"
+            v-if="fishingState === 'fighting'"
           >
             🎣 ТЯНУТЬ (Удерживайте ЛКМ)
           </button>
 
-          <div class="result-container" v-if="gameStore.showResult">
-            <div class="success-message" v-if="gameStore.fishingResult && gameStore.fishingResult.type === 'success'">
+          <div class="result-container" v-if="showResult">
+            <div class="success-message" v-if="fishingResult && fishingResult.type === 'success'">
               <div class="success-icon">🎉</div>
               <div class="success-text">
                 <h3>Поймали!</h3>
-                <p>{{ gameStore.currentFish?.emoji }} {{ gameStore.currentFish?.name }}</p>
+                <p>{{ currentFish?.emoji }} {{ currentFish?.name }}</p>
               </div>
             </div>
 
-            <div class="failed-message" v-if="gameStore.fishingResult && gameStore.fishingResult.type === 'failed'">
+            <div class="failed-message" v-if="fishingResult && fishingResult.type === 'failed'">
               <div class="failed-icon">❌</div>
               <div class="failed-text">
                 <h3>Рыба ушла!</h3>
-                <p>{{ gameStore.fishingResult.message }}</p>
+                <p>{{ fishingResult.message }}</p>
               </div>
             </div>
           </div>
 
-          <div class="fishing-hint" v-if="gameStore.fishingState === 'waiting'">
+          <div class="fishing-hint" v-if="fishingState === 'waiting'">
             ⏳ Ждем поклевки...
           </div>
 
-          <div class="fishing-hint" v-if="gameStore.fishingState === 'fighting'">
+          <div class="fishing-hint" v-if="fishingState === 'fighting'">
             🎣 Удерживайте ЛКМ чтобы вытащить рыбу! Цель: натяжение ≤ 10%
           </div>
         </div>
 
         <div class="fishing-rod-container">
           <div class="fishing-rod" :class="{
-            casting: gameStore.fishingState === 'casting',
-            waiting: gameStore.fishingState === 'waiting',
-            reeling: gameStore.isReeling
+            casting: fishingState === 'casting',
+            waiting: fishingState === 'waiting',
+            reeling: isReeling
           }">
             <div class="rod-handle"></div>
             <div class="rod-line"></div>
-            <div class="fishing-hook" :class="{ biting: gameStore.fishingState === 'fighting' }"></div>
+            <div class="fishing-hook" :class="{ biting: fishingState === 'fighting' }"></div>
           </div>
 
           <div
             class="biting-fish"
-            v-if="gameStore.fishingState === 'fighting' && gameStore.currentFish"
+            v-if="fishingState === 'fighting' && currentFish"
           >
-            {{ gameStore.currentFish.emoji }}
+            {{ currentFish.emoji }}
           </div>
         </div>
       </div>
@@ -94,9 +94,9 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted } from 'vue'
-import type { Location, Fish } from '../types'
-import { useGameStore } from '../stores/game'
+import { onUnmounted, computed, watch } from 'vue'
+import { useStore } from 'vuex'
+import type { Location, Fish } from '@/types'
 
 const props = defineProps<{
   location: Location
@@ -106,154 +106,59 @@ const emit = defineEmits<{
   'catch-fish': [fish: Fish & { location: string }]
 }>()
 
-const gameStore = useGameStore()
+const store = useStore()
 
-const startFishing = async () => {
-  console.log('🎣 Начинаем рыбалку')
-  gameStore.setFishingState('casting')
-  gameStore.setFishingResult(null)
-  gameStore.setShowResult(false)
-  gameStore.setTension(0)
-  gameStore.setCurrentFish(null)
+const fishingState = computed(() => store.getters['game/fishingState'])
+const isReeling = computed(() => store.getters['game/isReeling'])
+const tension = computed(() => store.getters['game/tension'])
+const currentFish = computed(() => store.getters['game/currentFish'])
+const showResult = computed(() => store.getters['game/showResult'])
+const fishingResult = computed(() => store.getters['game/fishingResult'])
 
-  await new Promise(resolve => setTimeout(resolve, 1500))
-  gameStore.setFishingState('waiting')
-  console.log('⏳ Ждем поклевки...')
+const tensionClass = computed(() => store.getters['game/tensionClass'])
+const tensionHint = computed(() => store.getters['game/tensionHint'])
 
-  const waitTime = Math.random() * 3000 + 2000
-  await new Promise(resolve => setTimeout(resolve, waitTime))
-
-  fishBite()
-}
-
-const fishBite = () => {
-  console.log('🐟 Рыба клюнула!')
-  gameStore.setFishingState('fighting')
-  gameStore.setCurrentFish(getRandomFish())
-
-  const initialTension = Math.floor(Math.random() * 30) + 40
-  gameStore.setTension(initialTension)
-
-  console.log('Выпала рыба:', gameStore.currentFish)
-  console.log('Начальное натяжение:', initialTension + '%')
-
-  const interval = setInterval(() => {
-    gameLoop()
-  }, 200)
-  gameStore.setGameInterval(interval)
-}
-
-const gameLoop = () => {
-  if (gameStore.fishingState !== 'fighting') return
-
-  const fishStrength = gameStore.currentFish?.strength || 1
-  let newTension = gameStore.tension
-
-  if (gameStore.isReeling) {
-    newTension = gameStore.tension - 3
-  }
-  else {
-    newTension = gameStore.tension + 1 + (fishStrength * 0.3)
-  }
-
-  newTension = Math.round(newTension)
-  gameStore.setTension(newTension)
-  console.log('🎣 Натяжение:', newTension + '%')
-
-  checkGameConditions()
-}
-
-const checkGameConditions = () => {
-  if (gameStore.tension >= 100) {
-    fishEscape('💥 Леска порвалась! Рыба ушла')
-    return
-  }
-
-  if (gameStore.tension <= 10) {
-    catchSuccess()
-    return
-  }
-}
-
-const stopGameLoop = () => {
-  if (gameStore.gameInterval) {
-    clearInterval(gameStore.gameInterval)
-    gameStore.setGameInterval(null)
-  }
+const handleStartFishing = async () => {
+  store.dispatch('fishing/setCurrentLocation', props.location)
+  store.dispatch('game/startFishing')
 }
 
 const startReeling = () => {
-  if (gameStore.fishingState !== 'fighting') return
-  gameStore.setIsReeling(true)
+  if (fishingState.value !== 'fighting') return
+  store.dispatch('game/setIsReeling', true)
 }
 
 const stopReeling = () => {
-  gameStore.setIsReeling(false)
+  store.dispatch('game/setIsReeling', false)
 }
 
-const catchSuccess = () => {
-  console.log('✅ Рыба поймана!', gameStore.currentFish)
-
-  stopGameLoop()
-  gameStore.setFishingState('success')
-  gameStore.setIsReeling(false)
-
-  const fishWithLocation = {
-    ...gameStore.currentFish!,
-    location: props.location.name
+const handleFishCaught = () => {
+  const fish = store.getters['game/currentFish']
+  if (fish) {
+    const fishWithLocation = {
+      ...fish,
+      location: props.location.name,
+      timestamp: new Date().toLocaleTimeString()
+    }
+    emit('catch-fish', fishWithLocation)
   }
-
-  emit('catch-fish', fishWithLocation)
-
-  gameStore.setFishingResult({
-    type: 'success',
-    message: `Поймали ${gameStore.currentFish!.emoji} ${gameStore.currentFish!.name}!`
-  })
-
-  gameStore.setShowResult(true)
-
-  setTimeout(() => {
-    returnToIdle()
-  }, 3000)
 }
 
-const fishEscape = (message: string) => {
-  stopGameLoop()
-  gameStore.setFishingState('failed')
-  gameStore.setIsReeling(false)
+watch(fishingState, (newState, oldState) => {
+  if (oldState === 'success' && newState === 'idle') {
+    handleFishCaught()
+  }
+})
 
-  gameStore.setFishingResult({
-    type: 'failed',
-    message: message
-  })
-
-  gameStore.setShowResult(true)
-
-  setTimeout(() => {
-    returnToIdle()
-  }, 3000)
-}
-
-const returnToIdle = () => {
-  gameStore.resetGame()
-}
-
-const getRandomFish = () => {
-  const fishArray = props.location.fish
-  const fish = fishArray[Math.floor(Math.random() * fishArray.length)]
-  return fish
-}
-
-const getTensionClass = () => {
-  return gameStore.getTensionClass()
-}
-
-const getTensionHint = () => {
-  return gameStore.getTensionHint()
-}
+watch(fishingResult, (newResult) => {
+  if (newResult?.type === 'success' && currentFish.value) {
+    handleFishCaught()
+  }
+})
 
 onUnmounted(() => {
-  stopGameLoop()
+  store.dispatch('game/stopGameLoop')
+  store.dispatch('game/resetGame')
 })
 </script>
 
@@ -266,7 +171,6 @@ onUnmounted(() => {
 @rod-color: #8B4513;
 @hook-color: #FFD700;
 @text-dark: #333;
-@text-darker: #000;
 @success-text: #2E7D32;
 @failed-text: #C62828;
 

@@ -17,9 +17,9 @@ export interface CaughtFish extends Fish {
   timestamp: string
 }
 
+export type FishingState = 'idle' | 'casting' | 'waiting' | 'fighting' | 'success' | 'failed'
+
 export interface FishingResult {
   type: 'success' | 'failed'
   message: string
 }
-
-export type FishingState = 'idle' | 'casting' | 'waiting' | 'fighting' | 'success' | 'failed'

@@ -5,9 +5,6 @@
 </template>
 
 <script setup lang="ts">
-import { useFishingStore } from './stores/fishing'
-
-const fishingStore = useFishingStore()
 </script>
 
 <style lang="less">

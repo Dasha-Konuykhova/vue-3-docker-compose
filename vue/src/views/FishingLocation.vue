@@ -17,30 +17,29 @@
 <script setup lang="ts">
 import FishingArea from '../components/FishingArea.vue'
 import { computed } from 'vue'
-import { useFishingStore } from '@/stores/fishing'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import type { Location, Fish, CaughtFish } from '@/types'
 
 const props = defineProps<{
   id: string | number
 }>()
 
-const fishingStore = useFishingStore()
+const store = useStore()
+const router = useRouter()
 
 const location = computed((): Location => {
-  const loc = fishingStore.getLocationById(parseInt(String(props.id)))
-  return loc || fishingStore.getLocationById(1)!
+  const loc = store.getters['fishing/getLocationById'](parseInt(String(props.id)))
+  return loc || store.getters['fishing/getLocationById'](1)
 })
 
 const handleCatchFish = (fishData: Fish & { location: string }) => {
-  console.log('FishingLocation: Рыба поймана', fishData)
-
   const caughtFish: CaughtFish = {
     ...fishData,
     timestamp: new Date().toLocaleTimeString()
   }
 
-  console.log('FishingLocation: Вызываем addFish', caughtFish)
-  fishingStore.addFish(caughtFish)
+  store.dispatch('fishing/addFish', caughtFish)
 }
 </script>
 
