@@ -1,34 +1,34 @@
-import type { FishingState, Fish, FishingResult } from '@/types'
-import type { GameState } from './types'
+import type { FishingState, Fish, FishingResult, GameModuleState } from '@/types'
 
 export const gameModule = {
   namespaced: true,
 
-  state: (): GameState => ({
+  state: (): GameModuleState => ({
     fishingState: 'idle',
     isReeling: false,
     fishingResult: null,
     currentFish: null,
     tension: 0,
     gameInterval: null,
+    biteTimeout: null,
     showResult: false
   }),
 
   getters: {
-    fishingState: (state: GameState) => state.fishingState,
-    isReeling: (state: GameState) => state.isReeling,
-    tension: (state: GameState) => state.tension,
-    currentFish: (state: GameState) => state.currentFish,
-    showResult: (state: GameState) => state.showResult,
-    fishingResult: (state: GameState) => state.fishingResult,
+    fishingState: (state: GameModuleState) => state.fishingState,
+    isReeling: (state: GameModuleState) => state.isReeling,
+    tension: (state: GameModuleState) => state.tension,
+    currentFish: (state: GameModuleState) => state.currentFish,
+    showResult: (state: GameModuleState) => state.showResult,
+    fishingResult: (state: GameModuleState) => state.fishingResult,
 
-    tensionClass: (state: GameState) => {
+    tensionClass: (state: GameModuleState) => {
       if (state.tension < 40) return 'safe'
       if (state.tension < 70) return 'warning'
       return 'danger'
     },
 
-    tensionHint: (state: GameState) => {
+    tensionHint: (state: GameModuleState) => {
       if (state.tension < 20) return 'Тяните сильнее!'
       if (state.tension < 60) return 'Хорошо! Продолжайте'
       return 'Осторожно! Слишком сильно!'
@@ -36,48 +36,47 @@ export const gameModule = {
   },
 
   mutations: {
-    SET_FISHING_STATE: (state: GameState, stateValue: FishingState) => {
+    SET_FISHING_STATE: (state: GameModuleState, stateValue: FishingState) => {
       state.fishingState = stateValue
     },
 
-    SET_IS_REELING: (state: GameState, reeling: boolean) => {
+    SET_IS_REELING: (state: GameModuleState, reeling: boolean) => {
       state.isReeling = reeling
     },
 
-    SET_TENSION: (state: GameState, tension: number) => {
+    SET_TENSION: (state: GameModuleState, tension: number) => {
       state.tension = Math.max(0, Math.min(100, tension))
     },
 
-    SET_CURRENT_FISH: (state: GameState, fish: Fish | null) => {
+    SET_CURRENT_FISH: (state: GameModuleState, fish: Fish | null) => {
       state.currentFish = fish
     },
 
-    SET_FISHING_RESULT: (state: GameState, result: FishingResult | null) => {
+    SET_FISHING_RESULT: (state: GameModuleState, result: FishingResult | null) => {
       state.fishingResult = result
     },
 
-    SET_SHOW_RESULT: (state: GameState, show: boolean) => {
+    SET_SHOW_RESULT: (state: GameModuleState, show: boolean) => {
       state.showResult = show
     },
 
-    SET_GAME_INTERVAL: (state: GameState, interval: NodeJS.Timeout | null) => {
-      if (state.gameInterval) {
-        clearInterval(state.gameInterval)
-      }
+    SET_GAME_INTERVAL: (state: GameModuleState, interval: NodeJS.Timeout | null) => {
       state.gameInterval = interval
     },
 
-    RESET_GAME: (state: GameState) => {
+    SET_BITE_TIMEOUT: (state: GameModuleState, timeout: NodeJS.Timeout | null) => {
+      state.biteTimeout = timeout
+    },
+
+    RESET_GAME: (state: GameModuleState) => {
       state.fishingState = 'idle'
       state.isReeling = false
       state.fishingResult = null
       state.currentFish = null
       state.tension = 0
       state.showResult = false
-      if (state.gameInterval) {
-        clearInterval(state.gameInterval)
-        state.gameInterval = null
-      }
+      state.gameInterval = null
+      state.biteTimeout = null
     }
   },
 
@@ -106,15 +105,41 @@ export const gameModule = {
       commit('SET_SHOW_RESULT', show)
     },
 
-    setGameInterval({ commit }: { commit: Function }, interval: NodeJS.Timeout | null) {
+    setGameInterval({ commit, state }: { commit: Function; state: GameModuleState }, interval: NodeJS.Timeout | null) {
+      if (state.gameInterval) {
+        clearInterval(state.gameInterval)
+      }
       commit('SET_GAME_INTERVAL', interval)
     },
 
-    resetGame({ commit }: { commit: Function }) {
+    setBiteTimeout({ commit, state }: { commit: Function; state: GameModuleState }, timeout: NodeJS.Timeout | null) {
+      if (state.biteTimeout) {
+        clearTimeout(state.biteTimeout)
+      }
+      commit('SET_BITE_TIMEOUT', timeout)
+    },
+
+    clearGameInterval({ commit, state }: { commit: Function; state: GameModuleState }) {
+      if (state.gameInterval) {
+        clearInterval(state.gameInterval)
+        commit('SET_GAME_INTERVAL', null)
+      }
+    },
+
+    clearBiteTimeout({ commit, state }: { commit: Function; state: GameModuleState }) {
+      if (state.biteTimeout) {
+        clearTimeout(state.biteTimeout)
+        commit('SET_BITE_TIMEOUT', null)
+      }
+    },
+
+    resetGame({ commit, dispatch }: { commit: Function; dispatch: Function }) {
+      dispatch('clearGameInterval')
+      dispatch('clearBiteTimeout')
       commit('RESET_GAME')
     },
 
-    startFishing({ dispatch, commit, state }: { dispatch: Function; commit: Function; state: GameState }) {
+    startFishing({ dispatch, commit, state }: { dispatch: Function; commit: Function; state: GameModuleState }) {
       if (state.fishingState !== 'idle') {
         return
       }
@@ -134,12 +159,12 @@ export const gameModule = {
             dispatch('fishBite')
           }, waitTime)
 
-          commit('SET_GAME_INTERVAL', biteTimeout as unknown as NodeJS.Timeout)
+          dispatch('setBiteTimeout', biteTimeout)
         }
       }, 1500)
     },
 
-    fishBite({ commit, dispatch, rootGetters, state }: { commit: Function; dispatch: Function; rootGetters: any; state: GameState }) {
+    fishBite({ commit, dispatch, rootGetters, state }: { commit: Function; dispatch: Function; rootGetters: any; state: GameModuleState }) {
       if (state.fishingState !== 'waiting') {
         return
       }
@@ -156,10 +181,10 @@ export const gameModule = {
       const interval = setInterval(() => {
         dispatch('gameLoop')
       }, 200)
-      commit('SET_GAME_INTERVAL', interval)
+      dispatch('setGameInterval', interval)
     },
 
-    gameLoop({ state, commit, dispatch }: { state: GameState; commit: Function; dispatch: Function }) {
+    gameLoop({ state, commit, dispatch }: { state: GameModuleState; commit: Function; dispatch: Function }) {
       if (state.fishingState !== 'fighting') return
 
       const fishStrength = state.currentFish?.strength || 1
@@ -176,7 +201,7 @@ export const gameModule = {
       dispatch('checkGameConditions')
     },
 
-    checkGameConditions({ state, commit, dispatch }: { state: GameState; commit: Function; dispatch: Function }) {
+    checkGameConditions({ state, commit, dispatch }: { state: GameModuleState; commit: Function; dispatch: Function }) {
       if (state.tension >= 100) {
         dispatch('fishEscape', 'Леска порвалась! Рыба ушла')
         return
@@ -188,10 +213,10 @@ export const gameModule = {
       }
     },
 
-    catchSuccess({ state, commit, dispatch, rootGetters }: { state: GameState; commit: Function; dispatch: Function; rootGetters: any }) {
+    catchSuccess({ state, commit, dispatch }: { state: GameModuleState; commit: Function; dispatch: Function }) {
       commit('SET_FISHING_STATE', 'success')
       commit('SET_IS_REELING', false)
-      dispatch('stopGameLoop')
+      dispatch('clearGameInterval')
 
       commit('SET_FISHING_RESULT', {
         type: 'success',
@@ -204,12 +229,12 @@ export const gameModule = {
       }, 3000)
     },
 
-    fishEscape({ dispatch, commit, state }: { dispatch: Function; commit: Function; state: GameState }, message: string) {
+    fishEscape({ dispatch, commit, state }: { dispatch: Function; commit: Function; state: GameModuleState }, message: string) {
       if (state.fishingState === 'failed') {
         return
       }
 
-      dispatch('stopGameLoop')
+      dispatch('clearGameInterval')
       commit('SET_FISHING_STATE', 'failed')
       commit('SET_IS_REELING', false)
 
@@ -224,11 +249,9 @@ export const gameModule = {
       }, 3000)
     },
 
-    stopGameLoop({ state, commit }: { state: GameState; commit: Function }) {
-      if (state.gameInterval) {
-        clearInterval(state.gameInterval)
-        commit('SET_GAME_INTERVAL', null)
-      }
+    stopGameLoop({ dispatch }: { dispatch: Function }) {
+      dispatch('clearGameInterval')
+      dispatch('clearBiteTimeout')
     }
   }
 }

@@ -1,11 +1,11 @@
 <template>
   <div class="location-selector">
-    <h2>🌊 Выберите водоем</h2>
-    <div class="locations-list">
+    <h2 class="location-selector__title">🌊 Выберите водоем</h2>
+    <div class="location-selector__list">
       <div
         v-for="location in locations"
         :key="location.id"
-        class="location-card"
+        class="location-selector__card"
         @click="goToLocation(location)"
       >
         <div class="location-image" :style="{ backgroundImage: `url(${location.image})` }">
@@ -35,8 +35,10 @@ defineProps<{
 }>()
 
 const goToLocation = (location: Location) => {
+  console.log('Navigating to location:', location.id, location.name) // для отладки
   router.push(`/location/${location.id}`)
 }
+
 </script>
 
 <style scoped lang="less">
@@ -58,13 +60,13 @@ const goToLocation = (location: Location) => {
   }
 }
 
-.locations-list {
+.location-selector__list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.location-card {
+.location-selector__card {
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;

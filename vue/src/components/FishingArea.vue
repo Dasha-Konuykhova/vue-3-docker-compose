@@ -144,12 +144,6 @@ const handleFishCaught = () => {
   }
 }
 
-watch(fishingState, (newState, oldState) => {
-  if (oldState === 'success' && newState === 'idle') {
-    handleFishCaught()
-  }
-})
-
 watch(fishingResult, (newResult) => {
   if (newResult?.type === 'success' && currentFish.value) {
     handleFishCaught()

@@ -23,3 +23,38 @@ export interface FishingResult {
   type: 'success' | 'failed'
   message: string
 }
+
+export interface FishingModuleState {
+  caughtFish: CaughtFish[]
+  currentLocation: Location | null
+}
+
+export interface GameModuleState {
+  fishingState: FishingState
+  isReeling: boolean
+  fishingResult: FishingResult | null
+  currentFish: Fish | null
+  tension: number
+  gameInterval: NodeJS.Timeout | null
+  biteTimeout: NodeJS.Timeout | null
+  showResult: boolean
+}
+
+export interface ActionContext {
+  commit: Function
+  dispatch: Function
+  state: any
+  getters: any
+  rootState: any
+  rootGetters: any
+}
+
+export interface RootState {
+  fishing: FishingModuleState
+  game: GameModuleState
+}
+
+export interface StoreModules {
+  fishing: FishingModuleState
+  game: GameModuleState
+}
