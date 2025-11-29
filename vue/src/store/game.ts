@@ -411,7 +411,7 @@ export const gameModule = {
       return new Promise((resolve) => {
         dispatch('clearGameInterval')
         commit('SET_FISHING_STATE', 'failed')
-        commit('SET_IS_REELING', false)
+        commit('SET_IS_REeling', false)
 
         commit('SET_FISHING_RESULT', {
           type: 'rod_break',

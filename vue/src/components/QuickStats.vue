@@ -1,22 +1,22 @@
 <template>
   <div class="quick-stats">
-    <h2>📊 Статистика</h2>
-    <div class="stats-grid">
+    <h2 class="quick-stats__title">📊 Статистика</h2>
+    <div class="quick-stats__grid">
       <div class="stat-item">
-        <div class="stat-label">Всего поймано</div>
-        <div class="stat-value">{{ totalFishCaught }}</div>
+        <div class="stat-item__label">Всего поймано</div>
+        <div class="stat-item__value">{{ totalFishCaught }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Уникальных видов</div>
-        <div class="stat-value">{{ uniqueFishTypes }}</div>
+        <div class="stat-item__label">Уникальных видов</div>
+        <div class="stat-item__value">{{ uniqueFishTypes }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Бонус силы</div>
-        <div class="stat-value">+{{ totalStrengthBonus }}</div>
+        <div class="stat-item__label">Бонус силы</div>
+        <div class="stat-item__value">+{{ totalStrengthBonus }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-label">Наживка</div>
-        <div class="stat-value" :class="{ warning: !hasBait }">
+        <div class="stat-item__label">Наживка</div>
+        <div class="stat-item__value" :class="{ 'stat-item__value--warning': !hasBait }">
           {{ hasBait ? 'Есть' : 'Нет' }}
         </div>
       </div>
@@ -49,17 +49,17 @@ const uniqueFishTypes = computed(() => {
   border: 1px solid #ddd;
   height: fit-content;
 
-  h2 {
+  &__title {
     color: #333;
     margin-bottom: 15px;
     text-align: center;
   }
-}
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
 }
 
 .stat-item {
@@ -69,25 +69,25 @@ const uniqueFishTypes = computed(() => {
   border-radius: 6px;
   border: 1px solid #e9ecef;
 
-  .stat-label {
+  &__label {
     font-size: 0.8em;
     color: #666;
     margin-bottom: 5px;
   }
 
-  .stat-value {
+  &__value {
     font-size: 1.2em;
     font-weight: bold;
     color: #2E7D32;
 
-    &.warning {
+    &--warning {
       color: #f44336;
     }
   }
 }
 
 @media (max-width: 768px) {
-  .stats-grid {
+  .quick-stats__grid {
     grid-template-columns: 1fr;
   }
 }

@@ -1,7 +1,7 @@
 import { createStore } from 'vuex'
-import { fishingModule } from './modules/fishing'
-import { gameModule } from './modules/game'
-import { shopModule } from './modules/shop'
+import { fishingModule } from './fishing'
+import { gameModule } from './game'
+import { shopModule } from './shop'
 
 export default createStore({
   modules: {
